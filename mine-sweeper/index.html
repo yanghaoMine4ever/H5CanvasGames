@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>saolie</title>
+    <script src="game.js"></script>
+</head>
+<style>
+    canvas {
+        background-color: lightgrey;
+    }
+</style>
+<body>
+    <p style="text-align: center">右键单元格打标记🚩</p>
+    <script>
+        window.addEventListener('load', function() {
+            document.oncontextmenu = function() {
+                return event.returnValue = false;
+            };
+            new SaoLei();
+        });    
+    </script>
+</body>
+</html>
