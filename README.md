@@ -3,5 +3,5 @@
 
 | Name | Operation |
 |:-------- |:--------:|
-| [贪吃蛇](https://yanghaomine4ever.github.io/H5CanvasGames/snake/snake.html) | [查看代码](https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/snake) |
+| <a href="https://yanghaomine4ever.github.io/H5CanvasGames/snake/snake.html" target="_blank">贪吃蛇</a> | <a href="https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/snake" target="_blank">查看代码</a> |
 
