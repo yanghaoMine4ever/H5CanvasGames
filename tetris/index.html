@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>tetris</title>
+</head>
+<body>
+    <canvas height="800" width="800" style="background-color: aliceblue" id="canvas"></canvas>
+    <script src="tetris.js"></script>
+    <script src="block.js"></script>
+    <script>
+        window.onload = function() {
+            new Tetris('canvas');
+        }
+    </script>
+</body>
+</html>
