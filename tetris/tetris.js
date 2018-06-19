@@ -259,7 +259,17 @@ function Tetris(id, w, h, len) {
                 break;
         }
     };
-
+    document.getElementById("clearAll").onclick = function() {
+        for (var i = 0; i < (w + 2) * (h + 2); i++) {
+            if (i < w + 2 || i > (w + 2) * (h + 1) || i % (w + 2) == 0 || i % (w + 2) == w + 1) { //墙
+                data[i] = { element: W };
+            } else {
+                data[i] = { element: N };
+            }
+        }
+        shatter(LEN * 2, LEN * 2, w * LEN, h * LEN);
+        score = 0;
+    };
 }
 
 function Dot(ctx, x, y, l, r, g, b, a) {
