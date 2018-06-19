@@ -4,6 +4,7 @@ function Tetris(id, w, h, len) {
     var LEN = len || 30;
     var fallingBlock = new Block(w / 2 - 2, 1, null, true), nextBlock = new Block(w / 2, 1, null, true);
     var speed = 1;
+    var score = 0;
     var data = [];
     var dots = [];
     for (var i = 0; i < (w + 2) * (h + 2); i++) {
@@ -20,6 +21,7 @@ function Tetris(id, w, h, len) {
     bufferCanvas.width = canvas.width;
     bufferCanvas.height = canvas.height;
     var ctx = bufferCanvas.getContext('2d');
+    ctx.strokeStyle = 'black';
     var lastTime = 0;
     var callback = function (t) {
         var dt = t - lastTime;
@@ -37,7 +39,7 @@ function Tetris(id, w, h, len) {
     }
 
     var updateBufferCanvas = function (dt) {
-        ctx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);    
+        ctx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
         ctx.fillStyle = "#292323";
         ctx.fillRect(2 * LEN, 2 * LEN, LEN * w, LEN * h);
         drawBlock();
@@ -54,31 +56,52 @@ function Tetris(id, w, h, len) {
     var updateData = function () {
         if (canFall()) {
             fallingBlock.fall();
-            clear();
         } else {
-            fallingBlock = new Block(w / 2 - 2, 1, null, true);
+            fallingBlock = nextBlock;
+            nextBlock = new Block(w / 2 - 2, 1, null, true);
         }
+        clear();
+        if(over()) {
+            clearInterval(timer);
+            alert('game over');
+        } 
     };
 
     var drawBlock = function () {
+        //画正在下落的方块
         ctx.fillStyle = fallingBlock.type.color;
         for (var i = 0; i < fallingBlock.data.length; i++) {
             for (var j = 0; j < fallingBlock.data[i].length; j++) {
                 if (fallingBlock.data[i][j] == 1) {
                     var index = toMapCoordinate(i, j);
-                    ctx.fillRect((index % (w + 2) + 1) * LEN, (~~(index / (w + 2)) + 1) * LEN, LEN, LEN);
+                    ctx.strokeRect((index % (w + 2) + 1) * LEN + 1, (~~(index / (w + 2)) + 1) * LEN + 1, LEN - 2, LEN - 2);
+                    ctx.fillRect((index % (w + 2) + 1) * LEN + 1, (~~(index / (w + 2)) + 1) * LEN + 1, LEN - 2, LEN - 2);
                 }
             }
         }
+        //画地图上的方块
         for (var i = 0; i < data.length; i++) {
             if (data[i].element == Y) {
                 ctx.fillStyle = data[i].color;
-                ctx.fillRect((i % (w + 2) + 1) * LEN, (~~(i / (w + 2)) + 1) * LEN, LEN, LEN);
+                ctx.fillRect((i % (w + 2) + 1) * LEN + 1, (~~(i / (w + 2)) + 1) * LEN + 1, LEN - 2, LEN - 2);
+                ctx.strokeRect((i % (w + 2) + 1) * LEN + 1, (~~(i / (w + 2)) + 1) * LEN + 1, LEN - 2, LEN- 2);
             }
         }
+        //下一个方块
+        ctx.fillStyle = nextBlock.type.color;
+        for (var i = 0; i < nextBlock.data.length; i++) {
+            for (var j = 0; j < nextBlock.data[i].length; j++) {
+                if (nextBlock.data[i][j] == Y) {
+                    ctx.strokeRect((w + 3 + j) * LEN + 1, (5 + i) * LEN + 1, LEN - 2, LEN- 2);
+                    ctx.fillRect((w + 3 + j) * LEN + 1, (5 + i) * LEN + 1, LEN - 2, LEN - 2);
+                }
+            }
+        }
+        ctx.font = "40px Arial";
+        ctx.fillText(score, (w + 5) * LEN, 10 * LEN);
     };
 
-
+    /**方块是否还能下落，遍历当前下落方块中为1的点在地图中的下一格是否为空 */
     var canFall = function () {
         var arr = [], canFall = true;
         for (var i = 0; i < fallingBlock.data.length; i++) {
@@ -92,18 +115,19 @@ function Tetris(id, w, h, len) {
                 }
             }
         }
-        if (!canFall) {
+        if (!canFall) { //不能下落时，固定再地图上
             arr.forEach(e => data[e] = { element: Y, color: fallingBlock.type.color });
             fallingBlock.isFall = false;
         }
         return canFall;
     };
 
+    /**通过拿到旋转后的矩阵，遍历其中为1的方块再地图上是否为空来判断是否可以旋转 */
     var canRotate = function () {
         var tempData = rotate90(fallingBlock.data);
         for (var i = 0; i < tempData.length; i++) {
             for (var j = 0; j < tempData[i].length; j++) {
-                if (tempData[i][j] == 0) {
+                if (tempData[i][j] == Y) {
                     var index = toMapCoordinate(i, j);
                     if (data[index].element != N) {
                         return false;
@@ -114,6 +138,7 @@ function Tetris(id, w, h, len) {
         return true;
     };
 
+    /**是否可以左右移动 */
     var canLeftOrRight = function (offset) {
         for (var i = 0; i < fallingBlock.data.length; i++) {
             for (var j = 0; j < fallingBlock.data[i].length; j++) {
@@ -128,48 +153,64 @@ function Tetris(id, w, h, len) {
         return true;
     };
 
+    /**判断是否可以消除 */
     var clear = function () {
-        for (var i = (w + 2) * (h + 1) - 2; ; i--) {
-            if (data[i].element == N) {
-                break;
+        var row = []; //用于存放可消除行的头元素节点
+        for (var i = w + 3; i <= (w + 2) * (h + 1) - 1; i += w + 2) { //每一行
+            var j = i;
+            while (j <= i + w - 1) {
+                if (data[j].element != Y) {
+                    break;
+                }
+                j++;
+            }
+            if (j == i + w) {
+                row.push(i);
             }
         }
-        var row = ~~(i / (w + 2)) + 1;
-        if (row <= h) {
-            var index = row * (w + 2);
-            for (var i = index; i <= (w + 2) * (h + 1) - 2; i++) {
-                if (data[i].element != W) {
+        if (row.length > 0) {
+            row.forEach(e => {
+                for (var i = e; i < e + w; i++) {
                     data[i] = { element: N };
                 }
-            }
-            packData(index);
-            shatter((index % (w + 2) + 2) * LEN, (~~(index / (w + 2) + 1)) * LEN, w * LEN, (h + 1 - row) * LEN);
+            });
+            packData(row[0] - 1, row[row.length - 1] + w);
+            shatter(2 * LEN, (~~(row[0] / (w + 2) + 1)) * LEN, w * LEN, row.length * LEN);
+            score += row.length * 10 * row.length;
             clearInterval(timer);
-            speed += 0.5;
+            speed += 0.25;
             timer = setInterval(function () {
                 updateData();
             }, 1000 / speed);
         }
     }
 
-    var packData = function (index) {
-        var arr = [], offset = (w + 2) * (h + 1) - index;
+    /**通过消除的其实位置，调整地图数据（全部方块往下落） */
+    var packData = function (start, end) {
+        var arr = [], offset = end - start + 1;
         for (var i = 0; i < data.length; i++) {
             if (data[i].element == W) {
                 arr.push(data[i]);
                 continue;
             }
             if (i - (w + 2) < offset) {
-                if (data[i - (w + 2) + index].element == W) {
-                    console.log();
-                }
-                arr.push(data[i - (w + 2) + index]);
+                arr.push(data[i - (w + 2) + start]);
+            } else if (i > end) {
+                arr.push(data[i]);
             } else {
                 arr.push(data[i - offset]);
             }
         }
         data = arr;
     }
+
+    var over = function() {
+        for(var i = w + 3; i < 2 * (w + 2) - 1; i++) {
+            if(data[i].element == Y) {
+                return true;
+            }
+        }
+    };
 
     var shatter = function (x, y, w, h) {
         var imageData = ctx.getImageData(x, y, w, h);
@@ -211,6 +252,7 @@ function Tetris(id, w, h, len) {
             case 40:
                 if (canFall()) {
                     fallingBlock.fall();
+                    clear();
                 }
                 break;
             default:
