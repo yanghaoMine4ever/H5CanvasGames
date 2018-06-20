@@ -3,7 +3,7 @@
 
 | Name | Operation |
 |:-------- |:--------:|
-| [贪吃蛇](https://yanghaomine4ever.github.io/H5CanvasGames/snake/snake.html) | [查看代码](https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/snake) |
+| [俄罗斯方块](https://yanghaomine4ever.github.io/H5CanvasGames/tetris/index.html) | [查看代码](https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/tetris) |
 | [扫雷](https://yanghaomine4ever.github.io/H5CanvasGames/mine-sweeper/index.html) | [查看代码](https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/mine-sweeper) |
 | [一字棋](https://yanghaomine4ever.github.io/H5CanvasGames/tic-tac-toe/index.html) | [查看代码](https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/tic-tac-toe) |
-| [俄罗斯方块](https://yanghaomine4ever.github.io/H5CanvasGames/tetris/index.html) | [查看代码](https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/tetris) |
+| [贪吃蛇](https://yanghaomine4ever.github.io/H5CanvasGames/snake/snake.html) | [查看代码](https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/snake) |
