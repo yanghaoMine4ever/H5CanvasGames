@@ -1,5 +1,3 @@
-之前学Java时写过一次俄罗斯方块，但是写的并不是很好，最近刚好临近毕业，比较闲，所以用Canvas重写了一遍，顺便把写的过程中的一些主要要点记录下来。最后的效果在这里[https://yanghaomine4ever.github.io/H5CanvasGames/tetris/index.html](https://yanghaomine4ever.github.io/H5CanvasGames/tetris/index.html)
-
 # 总体设计
 俄罗斯方块的逻辑不难，经过分析，做出如下总体设计：
 
@@ -276,8 +274,3 @@ for (var i = 0; i < dots.length; i++) {
 
 # 结论
 这个俄罗斯方块比较简单，当然我的代码也比较凌乱，界面也不美观。
-
-- - - 
-源代码地址：[https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/tetris](https://github.com/yanghaoMine4ever/H5CanvasGames/tree/master/tetris)
-
-今天(昨天)最后一个舍友也搬离了宿舍，我一个人在宿舍，心里有点空落落的，下次见面都不知道是什么时候，写完这篇博客，我就睡觉了，之后要更加努力学习(打机)。。
