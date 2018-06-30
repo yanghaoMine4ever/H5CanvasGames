@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>2048</title>
+</head>
+<style>
+    html,
+    body {
+        padding: 0;
+        margin: 0;
+        background: url("timg.jpg") no-repeat;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background-size: cover;
+    }
+
+    #launcher {
+        position: absolute;
+        width: 70px;
+        left: 200px;
+        top: 200px;
+        text-align: center;
+    }
+
+    #launcher:hover {
+        border: 1px dotted white;
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .window {
+        background-color: #faf8ef;
+        position: absolute;
+    }
+</style>
+
+<body>
+    <div id="launcher" draggable="true">
+        <canvas id="icon" width="50" height="50" style="display: inline-block;margin-top: 5px;"></canvas>
+        <span style="color: white;">2048</span>
+    </div>
+    <script src="2048.js"></script>
+    <script src="Two048.js"></script>
+</body>
+<script>
+    window.onload = function () {
+        _2048(400, 200);
+        document.oncontextmenu = function () {
+            return false;
+        };
+        var canvas = document.querySelector('#icon');
+        var ctx = canvas.getContext('2d');
+
+        ctx.drawImage(getIcon(50, 50), 0, 0);
+        setDragable('#launcher');
+
+        /**双击打开*/
+        var lastClickTime, firstClick = true;
+        document.querySelector('#launcher').onclick = function () {
+            var nowTime = new Date().getTime();
+            if (!lastClickTime || firstClick) {
+                firstClick = false;
+                lastClickTime = nowTime;
+                return;
+            }
+            if (nowTime - lastClickTime <= 1200) {
+                firstClick = true;
+                lastClickTime = nowTime;
+                _2048(400, 200);
+            }
+        };
+
+    };
+
+    function setDragable(selector) {
+        var dom = document.querySelector(selector);
+        var offsetX, offsetY;
+        dom.ondragstart = function (e) {
+            offsetX = e.offsetX;
+            offsetY = e.offsetY;
+        };
+        dom.ondrag = function (e) {
+            if (e.pageX == 0 && e.pageY == 0) {
+                return;
+            }
+            dom.style.left = e.pageX - offsetX + 'px';
+            dom.style.top = e.pageY - offsetY + 'px';
+        }
+    }
+
+    function getIcon(w, h) {
+        var icon = document.createElement('canvas');
+        icon.width = w;
+        icon.height = h;
+        var ctx = icon.getContext('2d');
+        ctx.fillStyle = '#f35123';
+        ctx.fillRect(0, 0, icon.width / 2, icon.height / 2);
+        ctx.fillStyle = '#7fb902';
+        ctx.fillRect(icon.width / 2, 0, icon.width / 2, icon.height / 2);
+        ctx.fillStyle = '#02a4ef';
+        ctx.fillRect(0, icon.height / 2, icon.width / 2, icon.height / 2);
+        ctx.fillStyle = '#ffb804';
+        ctx.fillRect(icon.width / 2, icon.height / 2, icon.width / 2, icon.height / 2);
+        ctx.fillStyle = 'white';
+        var fontSize = w / 2 - 5;
+        ctx.font =  fontSize + "px Arial";
+        ctx.textBaseline = 'top';
+        ctx.textAlign = 'center';
+        ctx.fillText('2', icon.width / 4, 0);
+        ctx.fillText('0', icon.width / 2 + icon.width / 4, 0);
+        ctx.fillText('4', icon.width / 4, icon.height / 2);
+        ctx.fillText('8', icon.width / 2 + icon.width / 4, icon.height / 2);
+        return icon;
+    }
+
+    function getIconX(w, h) {
+        var icon = document.createElement('canvas');
+        icon.width = w;
+        icon.height = h;
+        var ctx = icon.getContext('2d');
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(w, h);
+        ctx.moveTo(w, 0);
+        ctx.lineTo(0, h);
+        ctx.stroke();
+        return icon;
+    }
+
+</script>
+
+</html>
