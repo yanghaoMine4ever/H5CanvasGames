@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>A Clock</title>
+	<meta charset="utf-8">
+</head>
+
+
+<style type="text/css">
+	body{
+		background-color: lightgrey;
+	}
+	canvas{
+		margin-left: 30%;
+		margin-top: 8%;
+		width: 800px;
+		height: 500px;
+	}
+</style>
+<body>
+
+	<canvas id="canvas" width=800 height=500></canvas>
+	
+</body>
+<script type="text/javascript" >
+var canvas = document.getElementById('canvas'),
+	context = canvas.getContext('2d'),
+	X = canvas.width/2, //圆心坐标
+	Y = canvas.height/2,
+	R = canvas.height/2 - 50;
+
+
+function shadow(x, y,b) {
+	context.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    context.shadowOffsetX = x;
+    context.shadowOffsetX = y;
+    context.shadowBlur = 15;
+}
+
+
+function drawCircle() {
+	context.save();
+	context.beginPath();
+	context.arc(X, Y, R + 20, 0, Math.PI * 2, true);
+    context.fillStyle = '#ead6dd';
+    shadow(8);
+	context.fill();
+	context.stroke();
+	context.restore();
+
+	context.save();
+	context.fillStyle = '#F0F0F4';
+	context.beginPath();
+	context.arc(X, Y, R, 0, Math.PI * 2, true);
+	context.fill();
+	context.restore();
+
+
+	context.save();
+	context.beginPath();
+	context.arc(X, Y, R-1, Math.PI / 2, Math.PI * 3 / 2, false);
+	shadow(10, null, 30);
+	context.strokeStyle = '#ead6dd';
+	context.stroke();
+	context.restore();
+}
+
+function drawNumber() {
+	context.save();
+	var num = [1,2,3,4,5,6,7,8,9,10,11,12],
+		color = ['Red','Orange','#ffbf00','Green','Blue','purple','brown','#a2ab50','Black','Gray','pink','lightgreen'],
+		angle = 0,
+		x = 0,
+		y = 0;
+	num.forEach(function(num){
+		angle = Math.PI * 2 / 12 * ((num - 3) % 12); //
+		x = X + Math.cos(angle) * (R - 30);
+		y = Y + Math.sin(angle) * (R - 30);
+		var w = context.measureText(num).width;
+		context.fillStyle = color[num-1];
+		context.fillText(num,x - w/2,y + 15/1.7);
+	});
+	context.restore();
+}
+
+function drawCenter() {
+	context.beginPath();
+	context.arc(X,Y,4,0,Math.PI * 2,true);
+	context.fill();
+}
+
+function drawScale (){
+	var x = 0,
+		y = 0,
+		_x = 0,
+		_y = 0,
+		angle = 0,
+		a = 0;
+	for (var i = 0; i < 60; i++) {
+		a = 5;
+		 if (i % 5 === 0) {
+		 	a = 15;
+		 }
+		angle = Math.PI * 2 * (i - 15) / 60;
+		x = X + Math.cos(angle) * R,
+		y = Y + Math.sin(angle) * R;
+		_x = X + Math.cos(angle) * (R - a);
+		_y = Y + Math.sin(angle) * (R - a);
+		context.moveTo(x + 0.5, y + 0.5);
+		context.lineTo(_x + 0.5, _y  + 0.5);
+		context.lineWidth = 0.5	;
+		context.stroke();
+	}
+}
+
+function drawHour(date) {
+	var min = date.getMinutes(),
+		hour = date.getHours(),
+		angle = Math.PI * 2 / 12 * ((hour - 3) % 12)  + Math.PI * 2 /12 * min / 60;
+		context.moveTo(X, Y);
+		context.lineTo(0.5 + X + (R - 80) * Math.cos(angle), 0.5 + Y + (R - 80) * Math.sin(angle));
+		context.lineWidth = 4;
+		context.stroke();
+}
+
+function drawMinute(min,sec) {
+	var angle = Math.PI * 2 * (min - 15) / 60 + Math.PI * 2 / 60 * sec / 60;
+	context.moveTo(X,Y);
+	context.lineTo(0.5 + X + (R - 35) * Math.cos(angle), 0.5 + Y + (R - 35) * Math.sin(angle));
+	context.lineWidth = 2;
+	context.stroke();
+}
+
+function drawSecond(sec) {
+	var angle = Math.PI * 2 * (sec - 15) / 60;
+	context.moveTo(X,Y);
+	context.lineTo(X + (R - 25) * Math.cos(angle), Y + (R - 25) * Math.sin(angle));
+	context.lineWidth = 1;
+	context.stroke();
+}
+
+
+
+ 
+function drawClock() {
+	var date = new Date();
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.drawImage(image, 0, 0, canvas.width, canvas.height);
+	drawCircle();
+	drawNumber();
+	drawCenter();
+	drawScale();
+	drawHour(date);
+	drawMinute(date.getMinutes(), date.getSeconds());
+	drawSecond(date.getSeconds());
+}
+
+
+
+context.font = '30px bold Sylfaen'
+var image = new Image();
+image.src = '木.jpg';
+image.onload = function () {
+	drawClock();
+	setInterval(drawClock,1000);
+}
+</script>
+</html>
