@@ -17,11 +17,63 @@ function _2048(x, y) {
     initWindowFrame();
     initHead();
     initIntro();
-    drawBackground();
 
-    canvas.onmousedown = function(e) {
+    var game = new Two048();
+    var cells = game.cells;
+
+    var lastTime = 0;
+    var callback = function (t) {
+        var dt = t - lastTime;
+        lastTime = t;
+        update(dt);
+        requestAnimationFrame(callback);
+    };
+
+    requestAnimationFrame(callback);
+
+    function update(dt) {
+        ctx.clearRect(15, 158 + 35, 500, 500);
+        drawBackground();
+        drawCell();
+    }
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    function drawCell() {
+        cells.forEach(cell => {
+            ctx.fillStyle = cell.bgColor;
+            ctx.fillRect(15 + (cell.x + 1) * 16 + cell.x * 105, 
+            158 + 35 + (cell.y + 1) * 16 + cell.y * 105, cell.len, cell.len);
+            ctx.fillStyle = cell.color;
+            ctx.font = cell.len / 2 + 'px Arial';
+            ctx.fillText("" + cell.number, 15 + (cell.x + 1) * 16 + cell.x * 105 + cell.len / 2, 
+            158 + 35 + (cell.y + 1) * 16 + cell.y * 105 + cell.len / 2);
+        });
+    }
+
+    window.document.onkeydown = function(e) {
+        var keyCode = e.keyCode;
+        switch (keyCode) {
+            case 38:
+                game.up();
+                break;
+            case 37:
+                game.left();
+                break;
+            case 39:
+                game.right();
+                break;
+            case 40:
+                game.down();
+                break;
+            default:
+                break;
+        }
+    }
+
+    canvas.onmousedown = function (e) {
         var c = toCanvasCoordinate(e.pageX, e.pageY);
-        if(c.x >= canvas.width - 30 && c.y <= 40) {
+        if (c.x >= canvas.width - 30 && c.y <= 40) {
             closeWindow();
         }
     };
@@ -31,7 +83,7 @@ function _2048(x, y) {
         ctx.lineJoin = 'round';
         ctx.fillRect(15, 158 + 35, 500, 500);
         ctx.fillStyle = 'rgba(238, 228, 218, 0.35)';
-        for(var i = 0; i < 16; i++) {
+        for (var i = 0; i < 16; i++) {
             var x = (i % 4 + 1) * 16 + (i % 4) * 105;
             var y = (~~(i / 4) + 1) * 16 + (~~(i / 4)) * 105;
             ctx.fillRect(x + 15, y + 158 + 35, 105, 105);
@@ -66,7 +118,7 @@ function _2048(x, y) {
         ctx.fillStyle = '#eee4da';
         ctx.font = '14px Arial';
         ctx.fillText('BEST', canvas.width - 137 + 127 / 2, 65);
-        ctx.fillText('SCORE', canvas.width - 137 - 65 -10  + 65 / 2, 65);
+        ctx.fillText('SCORE', canvas.width - 137 - 65 - 10 + 65 / 2, 65);
         ctx.restore();
     }
 
@@ -97,9 +149,10 @@ function _2048(x, y) {
     }
 
     function toCanvasCoordinate(x, y) {
-        var bbox =canvas.getBoundingClientRect();
-        return { x: x- bbox.left *(canvas.width / bbox.width),
-            y:y - bbox.top  * (canvas.height / bbox.height)
+        var bbox = canvas.getBoundingClientRect();
+        return {
+            x: x - bbox.left * (canvas.width / bbox.width),
+            y: y - bbox.top * (canvas.height / bbox.height)
         };
     }
 
