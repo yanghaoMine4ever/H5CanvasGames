@@ -1,16 +1,20 @@
 function SaoLei(grid, count, len) {
-    var LEN = len || 25,
-        GRID = grid || 16,
-        NUMBER = count || 40,
+    var LEN = len || 25, // 单元格长度
+        GRID = grid || 16, // 每行(列)单元格个数，eg: 16 * 16
+        NUMBER = count || 40, // 地雷个数
+        // 常量标记，NONE：无东西，BOOM：炸弹，REVERSE：已被反转，FLAG：右键标记🚩，QUESTION：右键标记？
         NONE = 0, BOOM = -1, REVERSE = 100, FLAG = 101, QUESTION = 102,
-        data = [], flag = [],
-        start = false, over = false;
+        data = [], flag = [], // 二维数组表示地图上每个格子的情况
+        start = false, over = false; // start：是否已开始游戏（第一次点击格子），over：游戏是否结束
     var canvas = document.createElement("canvas"),
         context = canvas.getContext('2d');
     canvas.width = LEN * (GRID + 2);
     canvas.height = LEN * (GRID + 2);
     document.body.appendChild(canvas);
 
+    /**
+     * 初始化状态为全无
+     */
     for (var i = 0; i < GRID; i++) {
         var arr = [], arrr = [];
         for (var j = 0; j < GRID; j++) {
@@ -21,31 +25,40 @@ function SaoLei(grid, count, len) {
         flag.push(arrr);
     }
 
+    // 画格子
     drawGrid();
 
+    /**
+     * 响应鼠标点击事件
+     */
     canvas.onmousedown = function (event) {
-        if (over) return;
-        var cc = toGridCoordinate(event.x, event.y);
-        if (cc.x < 0 || cc.x >= GRID || cc.y < 0 || cc.y >= GRID) return;
-        !start && (start = true) && plantBoom(cc.x, cc.y);
-        if (data[cc.y][cc.x] == REVERSE) return;
-        if (!event.button) {
-            if (data[cc.y][cc.x] == BOOM) {
+        if (over) return; // 游戏已结束，直接返回
+        var cc = toGridCoordinate(event.x, event.y); // 取得鼠标坐标
+        if (cc.x < 0 || cc.x >= GRID || cc.y < 0 || cc.y >= GRID) return; // 在格子外，直接返回
+        !start && (start = true) && plantBoom(cc.x, cc.y); // 如果是第一次点击格子，则根据当前坐标，生成全图的地雷
+        if (data[cc.y][cc.x] == REVERSE) return; // 如果当前格子已被正确反转，直接返回
+        if (!event.button) { // 鼠标左键
+            if (data[cc.y][cc.x] == BOOM) { // 点击到地雷的位置，游戏结束
                 drawBoom();
                 over = true;
                 alert('you lost!');
-            } else if (data[cc.y][cc.x] == NONE) {
+            } else if (data[cc.y][cc.x] == NONE) { // 点击到空白位置，地图展开
                 expand(cc.x, cc.y);
             } else {
-                fillText(cc.x, cc.y, data[cc.y][cc.x]);
+                // 点击到安全位置，显示当前格子数字（周围地雷个数），并标记为已翻转
+                fillText(cc.x, cc.y, data[cc.y][cc.x]); 
                 data[cc.y][cc.x] = REVERSE;
             }
-        } else {
+        } else { // 鼠标右键，打标记
             drawFlag(cc.x, cc.y);
         }
+        // 检查是否结束游戏
         if (checkWin()) over = true && alert('you win!');
     };
 
+    /**
+     * 检查是否赢下游戏：所有非地雷的格子已被翻转
+     */
     function checkWin() {
         var count = 0;
         for (var i = 0; i < data.length; i++) {
@@ -58,6 +71,9 @@ function SaoLei(grid, count, len) {
         }
     }
 
+    /**
+     * 点到空白的位置，向外展开一圈数字
+     */
     function expand(x, y) {
         function Point(x, y) {
             this.x = x;
@@ -93,6 +109,9 @@ function SaoLei(grid, count, len) {
         return arr;
     }
 
+    /**
+     * 随机生成count个数的地雷
+     */
     function plantBoom(x, y) {
         var l = y * GRID + x,
             lup = y > 0 ? l - GRID : -99,
@@ -126,6 +145,9 @@ function SaoLei(grid, count, len) {
         }
     }
 
+    /**
+     * 在对应坐标的单元格填充数字
+     */
     function fillText(x, y, text, style) {
         context.save();
         context.fillStyle = style || "white";
@@ -151,10 +173,13 @@ function SaoLei(grid, count, len) {
         }
     }
 
+    /**
+     * 右键时，画对应的标记
+     */
     function drawFlag(x, y) {
         context.save();
         context.beginPath();
-        if(flag[y][x] == NONE) {
+        if(flag[y][x] == NONE) { // 未打过标的画旗子
             context.moveTo((x + 1.3) * LEN, (y + 1.1) * LEN);
             context.lineTo((x + 1.3) * LEN, (y + 1.9) * LEN);
             context.moveTo((x + 1.3) * LEN, (y + 1.1) * LEN);
@@ -166,10 +191,10 @@ function SaoLei(grid, count, len) {
             context.fill();
             context.stroke();
             flag[y][x] = FLAG;
-        } else if (flag[y][x] == FLAG) {
+        } else if (flag[y][x] == FLAG) { // 旗子变问号
             fillText(x, y, "?", 'lightgrey');
             flag[y][x] = QUESTION;
-        } else {
+        } else { // 恢复未打标状态
             context.fillStyle = "lightgrey";
             context.fillRect((x + 1) * LEN, (y + 1) * LEN, LEN, LEN);
             context.restore();
@@ -179,6 +204,9 @@ function SaoLei(grid, count, len) {
         context.restore();
     }
 
+    /**
+     * 画格子
+     */
     function drawGrid() {
         context.beginPath();
         for(var i = 1; i < GRID + 2; i++) {
@@ -191,11 +219,17 @@ function SaoLei(grid, count, len) {
         context.stroke();
     }
 
+    /**
+     * 将网页里的鼠标坐标转换为canvas画布里的坐标
+     */
     function toCanvasCoordinate(x, y) {
         var rect = canvas.getBoundingClientRect();
         return {x: x - rect.left, y: y - rect.top};
     }
 
+    /**
+     * 将网页里的鼠标坐标转换为网格的坐标
+     */
     function toGridCoordinate(x, y) {
         var c = toCanvasCoordinate(x, y);
         return {x: parseInt(c.x / LEN) - 1, y: parseInt(c.y / LEN) - 1};
